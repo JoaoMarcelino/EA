@@ -39,19 +39,66 @@ using namespace std;
     https://google.github.io/styleguide/cppguide.html#Variable_Names 
     */
 
-vector<vector<string>> ReadMatrix(int size_matrix){
+
+void PrintRow(vector<string> row){
+
+    for(auto iterator = row.begin(); iterator != row.end() ; ++iterator){
+        cout << *iterator << " ";
+    }
+    cout << "\n";
+
     
-    //TODO: read matrix
+}
+
+
+void PrintMatrix(vector<vector<string>> matrix){
+    
+    cout << "Matrix\n";
+    for(auto iterator = matrix.begin(); iterator != matrix.end() ; ++iterator){
+        PrintRow(*iterator);
+    }
+}
+
+
+vector<vector<string>> ReadMatrix(int size){
+    vector<string> aux(size);
+    vector<vector<string>> matrix(size, aux);
+    string line;
+    auto aux_matrix = matrix.begin();
+
+    for(int i =0; i< size; i++){
+
+        getline(cin, line);
+        istringstream iss(line);
+        vector<string> row(istream_iterator<string>{iss}, istream_iterator<string>());
+        
+        (*aux_matrix).assign(row.begin(), row.end());
+        ++aux_matrix;
+    }
+
+    return matrix;
 }
 
 
 void MainMatrices(){
-    string size_matrix, max_moves;
+
+
+    string line;
+    int size_matrix, max_moves;
     vector<vector<string>> matrix;
 
-    //TODO: read size_matrix, max_moves
+    getline(cin, line);
+    istringstream iss(line);
+    vector<string> results(istream_iterator<string>{iss}, istream_iterator<string>());
 
-    matrix = ReadMatrix(stoi(size_matrix));
+    auto iterator = results.begin();
+    size_matrix = stoi(*iterator);
+    max_moves = stoi(*(++iterator));
+
+
+    matrix = ReadMatrix(size_matrix);
+
+    PrintMatrix(matrix);
 
     //TODO: make money moves
 }
@@ -59,16 +106,26 @@ void MainMatrices(){
 
 int main()
 {      
-    ios_base::sync_with_stdio(0);
-    cin.tie(0);
+    
+    //ios_base::sync_with_stdio(0);
+    //cin.tie(0);
 
-    string num_matrices;
+    string line;
+    int num_matrices = 0;
 
-    //TODO: read num_matrices
+    getline(cin, line);
+
+    istringstream iss(line);
+    vector<string> results(istream_iterator<string>{iss}, istream_iterator<string>());
 
 
-    for(int i = 0; i< stoi(num_matrices); i++){
+    num_matrices =stoi(*(results.begin()));
+
+
+    for(int i = 0; i < num_matrices; i++){
         MainMatrices();
     }
+
+    return 0;
 
 }
