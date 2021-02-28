@@ -79,6 +79,50 @@ vector<vector<string>> ReadMatrix(int size){
     return matrix;
 }
 
+vector<vector<string>> MoveLeft(vector<vector<string>> matrix){
+
+    for(auto matrix_iterator = matrix.begin(); matrix_iterator != matrix.end(); ++matrix_iterator){
+        int count_erased = 0;
+        for (auto row_iterator = (*matrix_iterator).begin(); row_iterator !=(*matrix_iterator).end(); ++row_iterator){
+            if (*row_iterator == "0"){
+               (*matrix_iterator).erase(row_iterator);
+                count_erased++;
+                row_iterator--;
+            }
+        }
+        
+        for (int i = 0; i < count_erased; i++){
+            (*matrix_iterator).push_back("0");
+        }
+
+    }
+    return matrix;
+    PrintMatrix(matrix);
+}
+
+vector<vector<string>> MoveRight(vector<vector<string>> matrix){
+
+    for(auto matrix_iterator = matrix.begin(); matrix_iterator != matrix.end(); ++matrix_iterator){
+        int count_erased = 0;
+        for (auto row_iterator = (*matrix_iterator).begin(); row_iterator !=(*matrix_iterator).end(); ++row_iterator){
+            if (*row_iterator == "0"){
+               (*matrix_iterator).erase(row_iterator);
+                count_erased++;
+                row_iterator--;
+            }
+        }
+        
+        for (int i = 0; i < count_erased; i++){
+            (*matrix_iterator).insert((*matrix_iterator).begin(),"0");
+        }
+
+    }
+    return matrix;
+    PrintMatrix(matrix);
+}
+
+
+
 
 void MainMatrices(){
 
@@ -95,12 +139,14 @@ void MainMatrices(){
     size_matrix = stoi(*iterator);
     max_moves = stoi(*(++iterator));
 
-
     matrix = ReadMatrix(size_matrix);
 
+    //matrix = MoveLeft(matrix);
+    matrix = MoveRight(matrix);
     PrintMatrix(matrix);
 
     //TODO: make money moves
+    max_moves ++;
 }
 
 
