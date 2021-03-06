@@ -79,6 +79,30 @@ vector<vector<string>> ReadMatrix(int size){
     return matrix;
 }
 
+
+vector<vector<string>> RotateMatrix(vector<vector<string>> matrix, int size){
+    vector<string> aux(size);
+    vector<vector<string>> new_matrix(size, aux);
+    int row = 0, column = 0;
+
+    auto new__matrix_iterator  = new_matrix.begin();
+
+    for(auto matrix_iterator = matrix.begin(); matrix_iterator != matrix.end(); ++matrix_iterator){
+        column = 0;
+        for (auto row_iterator = (*matrix_iterator).begin(); row_iterator !=(*matrix_iterator).end(); ++row_iterator){
+            
+            //(*new_matrix).assign(row_iterator.begin(), row_iterator.end());
+            auto new_row_iterator = (*(new__matrix_iterator + column)).begin();
+
+            *(new_row_iterator + row) = *row_iterator;
+            column ++;
+        }
+        row++;
+    }
+    return new_matrix;
+}
+
+
 vector<vector<string>> MoveLeft(vector<vector<string>> matrix){
 
     for(auto matrix_iterator = matrix.begin(); matrix_iterator != matrix.end(); ++matrix_iterator){
@@ -122,6 +146,25 @@ vector<vector<string>> MoveRight(vector<vector<string>> matrix){
 }
 
 
+vector<vector<string>> MoveUp(vector<vector<string>> matrix, int size){
+
+    matrix = RotateMatrix(matrix, size);
+    matrix = MoveLeft(matrix);
+    matrix = RotateMatrix(matrix, size);
+
+    return matrix;
+}
+
+
+vector<vector<string>> MoveDown(vector<vector<string>> matrix, int size){
+
+    matrix = RotateMatrix(matrix, size);
+    matrix = MoveRight(matrix);
+    matrix = RotateMatrix(matrix, size);
+
+    return matrix;
+}
+
 
 
 void MainMatrices(){
@@ -141,8 +184,15 @@ void MainMatrices(){
 
     matrix = ReadMatrix(size_matrix);
 
-    //matrix = MoveLeft(matrix);
+
+    // DOING ALL THE MOVES
+    matrix = MoveLeft(matrix);
+    PrintMatrix(matrix);
     matrix = MoveRight(matrix);
+    PrintMatrix(matrix);
+    matrix = MoveDown(matrix, size_matrix);
+    PrintMatrix(matrix);
+    matrix = MoveUp(matrix, size_matrix);
     PrintMatrix(matrix);
 
     //TODO: make money moves
