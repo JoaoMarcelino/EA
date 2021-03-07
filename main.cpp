@@ -146,21 +146,23 @@ vector<vector<string>> MoveRight(vector<vector<string>> matrix){
     for(auto matrix_iterator = matrix.begin(); matrix_iterator != matrix.end(); ++matrix_iterator){
         count_erased = 0;
         last_number = "0";
-        for (auto row_iterator = (*matrix_iterator).begin(); row_iterator !=(*matrix_iterator).end(); ++row_iterator){
+
+        for (auto row_iterator = (*matrix_iterator).end() - 1; row_iterator !=(*matrix_iterator).begin() - 1; --row_iterator){
+            
             if (*row_iterator == "0"){
                (*matrix_iterator).erase(row_iterator);
                 count_erased++;
-                row_iterator--;
-            }
-            else if (*row_iterator == last_number){
+
+            }else if (*row_iterator == last_number){
                 (*matrix_iterator).erase(row_iterator);
                 count_erased++;
-                row_iterator--;
                 *row_iterator =  to_string(stoi(*row_iterator) + stoi(*row_iterator));
                 last_number = *row_iterator;
+
             }else{
                 last_number = *row_iterator;
             }
+            
         }
         for (int i = 0; i < count_erased; i++){
             (*matrix_iterator).insert((*matrix_iterator).begin(),"0");
