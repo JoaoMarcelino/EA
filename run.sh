@@ -3,6 +3,6 @@
 
 set -e
 echo "compiling..."
-g++ -std=c++17 -Wall -Wextra -O2 "$1.cpp" -lm
+g++ -std=c++17 -Wall -Wextra -O2 "$1.cpp" -lm 
 echo "running..."
-./a.out
+./a.out > test1.out < test.in
