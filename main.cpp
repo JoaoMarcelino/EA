@@ -11,7 +11,6 @@ using namespace std;
 
 int size_matrix;
 int max_value = 0;
-string last_move = "";
 
 bool is_completed = false;
 bool has_changed = false;
@@ -108,7 +107,7 @@ vector<vector<int>> MoveLeft(vector<vector<int>> matrix){
                 last_number = -1;
                 *row_iterator = *row_iterator * 2;
                 
-
+                has_changed = true;
                 is_completed = *row_iterator == max_value;
             }else{
                 last_number = *row_iterator;
@@ -146,6 +145,7 @@ vector<vector<int>> MoveRight(vector<vector<int>> matrix){
                 last_number = -1;
                 *row_iterator =  *row_iterator * 2;
 
+                has_changed = true;
                 is_completed = *row_iterator == max_value;
 
             }
@@ -183,8 +183,8 @@ vector<vector<int>> MoveDown(vector<vector<int>> matrix){
 }
 
 
-int Recursion(vector<vector<int>> matrix, int moves_left, int moves){
-    vector<int> child(4);
+int Recursion(vector<vector<int>> matrix, int moves_left, int moves, string last_move){
+    vector<int> child(4, -1);
     auto iterator = child.begin();
 
     //PrintMatrix(matrix);   
@@ -198,10 +198,24 @@ int Recursion(vector<vector<int>> matrix, int moves_left, int moves){
         return -1;
     }
 
-    *iterator++ = Recursion(MoveLeft(matrix), moves_left -1, moves + 1);
-    *iterator++ = Recursion(MoveRight(matrix), moves_left -1, moves + 1);
-    *iterator++ = Recursion(MoveUp(matrix), moves_left -1, moves + 1);
-    *iterator   = Recursion(MoveDown(matrix), moves_left -1, moves + 1);
+    if(last_move != "Left" || has_changed){
+        has_changed = false;
+        *iterator++ = Recursion(MoveLeft(matrix), moves_left -1, moves + 1, "Left");
+    }
+    if(last_move != "Right" || has_changed){
+        has_changed = false;
+        *iterator++ = Recursion(MoveRight(matrix), moves_left -1, moves + 1, "Right");
+    }
+    if(last_move != "Up" || has_changed){
+        has_changed = false;
+        *iterator++ = Recursion(MoveUp(matrix), moves_left -1, moves + 1, "Up");
+    }
+    if(last_move != "Down" || has_changed){
+        has_changed = false;
+        last_move = "Down";
+        *iterator   = Recursion(MoveDown(matrix), moves_left -1, moves + 1, "Down");
+    }
+
 
 
 
@@ -232,7 +246,7 @@ void MainMatrices(){
     int printable_value;
     //TODO: make money moves
     if(modf(log2 (max_value), &intpart) == 0.0){
-        printable_value = Recursion(matrix, max_moves, 0);
+        printable_value = Recursion(matrix, max_moves, 0, "");
         if (printable_value == -1)
             cout << "no solution" << endl;
         else
