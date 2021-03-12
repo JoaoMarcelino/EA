@@ -13,6 +13,7 @@ using namespace std;
 
 int size_matrix;
 int max_value = 0;
+int best_moves_left;
 
 bool is_completed = false;
 bool has_changed = false;
@@ -199,10 +200,16 @@ int Recursion(vector<vector<int>> matrix, int moves_left, int moves, string last
     vector<int> child(4, -1);
     auto iterator = child.begin();
 
+    if (moves_left <= best_moves_left){
+            is_completed = false;
+            return -1;
+    }
     if (is_completed) // Só houver 1 número restante
-    {
+    {        
         is_completed = false;
-        return moves_left;
+        best_moves_left = moves_left;
+        return best_moves_left;
+        
     }
 
     if (moves_left == 0)
@@ -229,9 +236,9 @@ int Recursion(vector<vector<int>> matrix, int moves_left, int moves, string last
     if (last_move != "Down" || has_changed)
     {
         has_changed = false;
-        last_move = "Down";
         *iterator = Recursion(MoveDown(matrix), moves_left - 1, moves + 1, "Down");
     }
+
 
     return *max_element(child.begin(), child.end());
 }
@@ -254,18 +261,19 @@ void MainMatrices()
     matrix = ReadMatrix();
 
     double intpart;
-    int printable_value;
+    int moves_left;
 
     //TODO: make money moves
     if (modf(log2(max_value), &intpart) == 0.0)
     {
-        printable_value = Recursion(matrix, max_moves, 0, "");
+        best_moves_left = -1;
+        moves_left = Recursion(matrix, max_moves, 0, "");
 
-        if (printable_value == -1)
+        if (moves_left == -1)
             cout << "no solution" << endl;
 
         else
-            cout << max_moves - printable_value << endl;
+            cout << max_moves - moves_left << endl;
     }
 
     else
