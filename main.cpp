@@ -12,221 +12,263 @@
 
 using namespace std;
 
-int size_matrix;
+int row_size;
 int max_value = 0;
+int max_atual = 0;
 int best_moves_left;
 
 bool is_completed = false;
 bool has_changed = false;
 
 /*
-unordered_map< vector<vector<int>>, vector<vector<int>> > hashtable_left;
-unordered_map< vector<vector<int>>, vector<vector<int>> > hashtable_right;
+unordered_map< vector<int>, vector<int> > hashtable_left;
+unordered_map< vector<int>, vector<int> > hashtable_right;
 */
 
-void PrintRow(vector<int> row)
+void PrintMatrix(vector<int> matrix)
 {
-    for (auto iterator = row.begin(); iterator != row.end(); ++iterator)
-        cout << *iterator << " ";
+    cout << "\nMatrix\n";
 
-    cout << "\n";
+    auto inicio = matrix.begin();
+
+    for (int i = 0; i < row_size * row_size; i++){
+
+        cout << *(inicio + i);
+
+		(i + 1) % row_size == 0 ? cout << endl : cout << ' ';
+	}
 }
 
-void PrintMatrix(vector<vector<int>> matrix)
+vector<int> ReadMatrix()
 {
-    cout << "Matrix\n";
-
-    for (auto iterator = matrix.begin(); iterator != matrix.end(); ++iterator)
-        PrintRow(*iterator);
-
-    cout << "\n";
-}
-
-vector<vector<int>> ReadMatrix()
-{
-    vector<int> aux(size_matrix);
-    vector<vector<int>> matrix(size_matrix, aux);
+    vector<int> matrix(row_size * row_size);
 
     string line;
-    auto aux_matrix = matrix.begin();
+	int n;
 
-    for (int i = 0; i < size_matrix; i++)
+    for (auto it = matrix.begin(); it != matrix.end(); it++)
     {
-        getline(cin, line);
-        istringstream iss(line);
-        vector<int> row(istream_iterator<int>{iss}, istream_iterator<int>());
+		cin >> n;
+		*it = n;
+        max_value += n;
 
-        auto aux_row = (*aux_matrix).begin();
-
-        for (auto iterator = row.begin(); iterator != row.end(); ++iterator)
-        {
-            max_value += *iterator;
-            *aux_row++ = *iterator;
-        }
-
-        (*aux_matrix).assign(row.begin(), row.end());
-        ++aux_matrix;
+		if (max_atual < n)
+			max_atual = n;
     }
-
     return matrix;
 }
 
-vector<vector<int>> RotateMatrix(vector<vector<int>> matrix)
+vector<int> MoveLeft(vector<int> matrix)
 {
-    vector<int> aux(size_matrix);
-    vector<vector<int>> new_matrix(size_matrix, aux);
+    auto matrix_iterator = matrix.begin();
+	vector<int>::iterator position_iterator;
+	int last_number, first_position, position;
 
-    int row = 0;
-    int column = 0;
-    auto new__matrix_iterator = new_matrix.begin();
-
-    for (auto matrix_iterator = matrix.begin(); matrix_iterator != matrix.end(); ++matrix_iterator)
-    {
-        column = 0;
-
-        for (auto row_iterator = (*matrix_iterator).begin(); row_iterator != (*matrix_iterator).end(); ++row_iterator)
-        {
-            //(*new_matrix).assign(row_iterator.begin(), row_iterator.end());
-            auto new_row_iterator = (*(new__matrix_iterator + column)).begin();
-
-            *(new_row_iterator + row) = *row_iterator;
-            column++;
-        }
-
-        row++;
-    }
-
-    return new_matrix;
-}
-
-vector<vector<int>> MoveLeft(vector<vector<int>> matrix)
-{
-    int count_erased;
-    int last_number = -1;
-
-    /*
-    vector<int> aux(size_matrix);
-    vector<vector<int>> aux_matrix = matrix;
-
-    auto value_matrix = hashtable_left.find(matrix);
-    if (value_matrix != hashtable_left.end())
-        return value_matrix->second;
-    */
-   
-    for (auto matrix_iterator = matrix.begin(); matrix_iterator != matrix.end(); ++matrix_iterator)
-    {
-        count_erased = 0;
+    for (int i = 0; i < row_size * row_size; i += row_size)
+	{
         last_number = -1;
+        first_position = i;
 
-        for (auto row_iterator = (*matrix_iterator).begin(); row_iterator != (*matrix_iterator).end(); ++row_iterator)
-        {
-            if (*row_iterator == 0)
-            {
-                (*matrix_iterator).erase(row_iterator);
-                count_erased++;
-                row_iterator--;
+        for (int j = 0; j < row_size; j++)
+		{
+            position = i + j;
+            position_iterator = matrix_iterator + position;
+			
+            if (*position_iterator != 0)
+			{   
+				if (*position_iterator == last_number)
+				{   
+                    auto multiplier_iterator = (matrix_iterator + first_position - 1);
+					*multiplier_iterator *= 2;
+                    last_number = -1;
+					*position_iterator = 0;
+
+                    has_changed = true;
+                    is_completed = *multiplier_iterator == max_value;
+                    if (max_atual < *multiplier_iterator)
+						max_atual = *multiplier_iterator;
+				}
+                
+                else if (position != first_position)
+				{
+					last_number = *(position_iterator);
+                    *(matrix_iterator + first_position) = last_number;
+                    *position_iterator = 0;
+                	first_position++;
+                }
+				
+                else
+				{
+                    last_number = *(position_iterator);
+					first_position++;
+                }
             }
-
-            else if (*row_iterator == last_number)
-            {
-                (*matrix_iterator).erase(row_iterator);
-                count_erased++;
-                row_iterator--;
-                last_number = -1;
-                *row_iterator = *row_iterator * 2;
-
-                has_changed = true;
-                is_completed = *row_iterator == max_value;
-            }
-
-            else
-                last_number = *row_iterator;
         }
-
-        for (int i = 0; i < count_erased; i++)
-            (*matrix_iterator).push_back(0);
     }
 
-    //hashtable_left.insert(make_pair(aux_matrix, matrix));
     return matrix;
 }
 
-vector<vector<int>> MoveRight(vector<vector<int>> matrix)
+vector<int> MoveRight(vector<int> matrix)
 {
-    int count_erased;
-    int last_number = -1;
-	
-    /*
-    vector<int> aux(size_matrix);
-    vector<vector<int>> aux_matrix = matrix;
+    auto matrix_iterator = matrix.begin();
+	vector<int>::iterator position_iterator;  
+	int last_number, first_position, position;
 
-    auto value_matrix = hashtable_right.find(matrix);
-    if (value_matrix != hashtable_right.end())
-        return value_matrix->second;
-    */
-
-    for (auto matrix_iterator = matrix.begin(); matrix_iterator != matrix.end(); ++matrix_iterator)
-    {
-        count_erased = 0;
+    for (int i = 0; i < row_size * row_size; i += row_size)
+	{
         last_number = -1;
+        first_position = i + row_size - 1;
 
-        for (auto row_iterator = (*matrix_iterator).end() - 1; row_iterator != (*matrix_iterator).begin() - 1; --row_iterator)
-        {
+        for (int j = row_size - 1; j >= 0; j--)
+		{
+            position = i + j;
+            position_iterator = matrix_iterator + position;
+			
+            if (*position_iterator != 0)
+			{   
+				if (*position_iterator == last_number)
+				{
+					auto multiplier_iterator = (matrix_iterator + first_position + 1);
+                    *multiplier_iterator *= 2;
+                    last_number = -1;
+					*position_iterator = 0;
 
-            if (*row_iterator == 0)
-            {
-                (*matrix_iterator).erase(row_iterator);
-                count_erased++;
+                    has_changed = true;
+                    is_completed = *multiplier_iterator == max_value;
+                    if (max_atual < *multiplier_iterator)
+						max_atual = *multiplier_iterator;
+				}
+                
+                else if (position != first_position)
+				{
+					last_number = *(position_iterator);
+                    *(matrix_iterator + first_position) = last_number;
+                    *position_iterator = 0;
+                	first_position--;
+                }
+				
+                else
+				{
+                    last_number = *(position_iterator);
+					first_position--;
+                }
             }
-
-            else if (*row_iterator == last_number)
-            {
-                (*matrix_iterator).erase(row_iterator);
-                count_erased++;
-                last_number = -1;
-                *row_iterator = *row_iterator * 2;
-
-                has_changed = true;
-                is_completed = *row_iterator == max_value;
-            }
-
-            else
-                last_number = *row_iterator;
         }
-
-        for (int i = 0; i < count_erased; i++)
-            (*matrix_iterator).insert((*matrix_iterator).begin(), 0);
     }
 
-    //hashtable_right.insert(make_pair(aux_matrix, matrix));
     return matrix;
 }
 
-vector<vector<int>> MoveUp(vector<vector<int>> matrix)
+vector<int> MoveUp(vector<int> matrix)
 {
-    matrix = RotateMatrix(matrix);
-    matrix = MoveLeft(matrix);   
-    matrix = RotateMatrix(matrix);
+    auto matrix_iterator = matrix.begin();
+	vector<int>::iterator position_iterator;  
+	int last_number, first_position, position;
+
+    for (int i = 0; i < row_size; i++)
+	{
+        last_number = -1;
+        first_position = i;
+
+        for (int j = 0; j < row_size * row_size; j+= row_size)
+		{
+            position = i + j;
+            position_iterator = matrix_iterator + position;
+			
+            if (*position_iterator != 0)
+			{   
+				if (*position_iterator == last_number)
+				{
+                    auto multipier_iterator = (matrix_iterator + first_position - row_size);
+                    *multipier_iterator *= 2;
+                    last_number = -1;
+					*position_iterator = 0;
+
+                    has_changed = true;
+                    is_completed = *multipier_iterator == max_value;
+                    if (max_atual < *multipier_iterator)
+						max_atual = *multipier_iterator;
+				}
+                
+                else if (position != first_position)
+				{
+                    last_number = *(position_iterator);
+                    *(matrix_iterator + first_position) = last_number;
+                    *position_iterator = 0;
+                	first_position += row_size;
+                }
+				
+                else
+				{
+                    last_number = *(position_iterator);
+					first_position += row_size;
+                }
+            }
+        }
+    }
 
     return matrix;
 }
 
-
-vector<vector<int>> MoveDown(vector<vector<int>> matrix)
+vector<int> MoveDown(vector<int> matrix)
 {
-    matrix = RotateMatrix(matrix);
-    matrix = MoveRight(matrix);
-    matrix = RotateMatrix(matrix);
+    auto matrix_iterator = matrix.begin();
+	vector<int>::iterator position_iterator;  
+	int last_number, first_position, position;
+
+    for (int i = 0; i < row_size; i++)
+	{
+        last_number = -1;
+        first_position = i + row_size * (row_size - 1);
+
+        for (int j = row_size * (row_size - 1); j >= 0; j -= row_size)
+		{
+            position = i + j;
+            position_iterator = matrix_iterator + position;
+			
+            if (*position_iterator != 0)
+			{   
+				if (*position_iterator == last_number)
+				{
+                    
+                    auto multipier_iterator = (matrix_iterator + first_position + row_size);
+                    *multipier_iterator *= 2;
+                    last_number = -1;
+					*position_iterator = 0;
+
+                    has_changed = true;
+                    is_completed = *multipier_iterator == max_value;
+                    if (max_atual < *multipier_iterator)
+						max_atual = *multipier_iterator;
+				}
+                
+                else if (position != first_position)
+				{
+                    last_number = *(position_iterator);
+                    *(matrix_iterator + first_position) = last_number;
+                    *position_iterator = 0;
+                	first_position -= row_size;
+                }
+				
+                else
+				{
+                    last_number = *(position_iterator);
+					first_position -= row_size;
+                }
+            }
+        }
+    }
 
     return matrix;
 }
 
-int Recursion(vector<vector<int>> matrix, int moves_left, int moves, string last_move)
+int Recursion(vector<int> matrix, int moves_left, int moves, string last_move)
 {
     vector<int> child(4, -1);
     auto iterator = child.begin();
 
-    if (moves_left <= best_moves_left)  // Se a solução atual for pior
+    if (moves_left <= best_moves_left || log2(max_value / max_atual) > moves_left)  // Se a solução atual for pior
     {
         is_completed = false;
         return -1;
@@ -272,23 +314,16 @@ int Recursion(vector<vector<int>> matrix, int moves_left, int moves, string last
 
 void MainMatrices()
 {
-    string line;
     int max_moves;
-    vector<vector<int>> matrix;
+    vector<int> matrix;
 
-    getline(cin, line);
-    istringstream iss(line);
-    vector<string> results(istream_iterator<string>{iss}, istream_iterator<string>());
-
-    auto iterator = results.begin();
-    size_matrix = stoi(*iterator);
-    max_moves = stoi(*(++iterator));
+    cin >> row_size >> max_moves;
 
     matrix = ReadMatrix();
-
+    
     double intpart;
-
     //TODO: make money moves
+
     if (modf(log2(max_value), &intpart) == 0.0)
     {
         best_moves_left = -1;
@@ -303,6 +338,8 @@ void MainMatrices()
 
     else
         cout << "no solution" << endl;
+
+
 }
 
 int main()
@@ -310,15 +347,13 @@ int main()
     ios_base::sync_with_stdio(0);
     cin.tie(0);
 
-    string line;
+    int n_line;
     int num_matrices = 0;
 
-    getline(cin, line);
 
-    istringstream iss(line);
-    vector<string> results(istream_iterator<string>{iss}, istream_iterator<string>());
+    cin >> n_line;
 
-    num_matrices = stoi(*(results.begin()));
+    num_matrices = n_line;
 
     for (int i = 0; i < num_matrices; i++)
     {
