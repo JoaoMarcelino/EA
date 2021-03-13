@@ -6,6 +6,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 #include <math.h>
 
@@ -17,6 +18,11 @@ int best_moves_left;
 
 bool is_completed = false;
 bool has_changed = false;
+
+/*
+unordered_map< vector<vector<int>>, vector<vector<int>> > hashtable_left;
+unordered_map< vector<vector<int>>, vector<vector<int>> > hashtable_right;
+*/
 
 void PrintRow(vector<int> row)
 {
@@ -98,6 +104,15 @@ vector<vector<int>> MoveLeft(vector<vector<int>> matrix)
     int count_erased;
     int last_number = -1;
 
+    /*
+    vector<int> aux(size_matrix);
+    vector<vector<int>> aux_matrix = matrix;
+
+    auto value_matrix = hashtable_left.find(matrix);
+    if (value_matrix != hashtable_left.end())
+        return value_matrix->second;
+    */
+   
     for (auto matrix_iterator = matrix.begin(); matrix_iterator != matrix.end(); ++matrix_iterator)
     {
         count_erased = 0;
@@ -132,6 +147,7 @@ vector<vector<int>> MoveLeft(vector<vector<int>> matrix)
             (*matrix_iterator).push_back(0);
     }
 
+    //hashtable_left.insert(make_pair(aux_matrix, matrix));
     return matrix;
 }
 
@@ -139,6 +155,15 @@ vector<vector<int>> MoveRight(vector<vector<int>> matrix)
 {
     int count_erased;
     int last_number = -1;
+	
+    /*
+    vector<int> aux(size_matrix);
+    vector<vector<int>> aux_matrix = matrix;
+
+    auto value_matrix = hashtable_right.find(matrix);
+    if (value_matrix != hashtable_right.end())
+        return value_matrix->second;
+    */
 
     for (auto matrix_iterator = matrix.begin(); matrix_iterator != matrix.end(); ++matrix_iterator)
     {
@@ -173,17 +198,19 @@ vector<vector<int>> MoveRight(vector<vector<int>> matrix)
             (*matrix_iterator).insert((*matrix_iterator).begin(), 0);
     }
 
+    //hashtable_right.insert(make_pair(aux_matrix, matrix));
     return matrix;
 }
 
 vector<vector<int>> MoveUp(vector<vector<int>> matrix)
 {
     matrix = RotateMatrix(matrix);
-    matrix = MoveLeft(matrix);
+    matrix = MoveLeft(matrix);   
     matrix = RotateMatrix(matrix);
 
     return matrix;
 }
+
 
 vector<vector<int>> MoveDown(vector<vector<int>> matrix)
 {
@@ -199,9 +226,9 @@ int Recursion(vector<vector<int>> matrix, int moves_left, int moves, string last
     vector<int> child(4, -1);
     auto iterator = child.begin();
 
-    if (moves_left <= best_moves_left)
+    if (moves_left <= best_moves_left)  // Se a solução atual for pior
     {
-        is_completed = false; // Linha desnecessária? Jospy
+        is_completed = false;
         return -1;
     }
 
@@ -222,10 +249,10 @@ int Recursion(vector<vector<int>> matrix, int moves_left, int moves, string last
         *iterator++ = Recursion(MoveRight(matrix), moves_left - 1, moves + 1, "Right");
     }
 
-    if (last_move != "Down" || has_changed) // Mexi isto para segundo caso pq se n é direita qual a likelyhood de ser esquerda? Jospy
+    if (last_move != "Down" || has_changed)
     {
         has_changed = false;
-        *iterator = Recursion(MoveDown(matrix), moves_left - 1, moves + 1, "Down");
+        *iterator++ = Recursion(MoveDown(matrix), moves_left - 1, moves + 1, "Down");
     }
 
     if (last_move != "Left" || has_changed)
@@ -237,10 +264,10 @@ int Recursion(vector<vector<int>> matrix, int moves_left, int moves, string last
     if (last_move != "Up" || has_changed)
     {
         has_changed = false;
-        *iterator++ = Recursion(MoveUp(matrix), moves_left - 1, moves + 1, "Up");
+        *iterator = Recursion(MoveUp(matrix), moves_left - 1, moves + 1, "Up");
     }
 
-    return *max_element(child.begin(), child.end()); // Se n mudar nada precisamos de fazer isto à mesma ou basta return -1? Jospy
+    return iterator != child.begin() ? *max_element(child.begin(), child.end()) : -1;
 }
 
 void MainMatrices()
@@ -260,19 +287,18 @@ void MainMatrices()
     matrix = ReadMatrix();
 
     double intpart;
-    int moves_left;
 
     //TODO: make money moves
     if (modf(log2(max_value), &intpart) == 0.0)
     {
         best_moves_left = -1;
-        moves_left = Recursion(matrix, max_moves, 0, "");
+        Recursion(matrix, max_moves, 0, "");
 
-        if (moves_left == -1)
+        if (best_moves_left == -1)
             cout << "no solution" << endl;
 
         else
-            cout << max_moves - moves_left << endl;
+            cout << max_moves - best_moves_left << endl;
     }
 
     else
