@@ -21,9 +21,8 @@ bool has_changed = false;
 void PrintRow(vector<int> row)
 {
     for (auto iterator = row.begin(); iterator != row.end(); ++iterator)
-    {
         cout << *iterator << " ";
-    }
+
     cout << "\n";
 }
 
@@ -200,31 +199,39 @@ int Recursion(vector<vector<int>> matrix, int moves_left, int moves, string last
     vector<int> child(4, -1);
     auto iterator = child.begin();
 
-    if (moves_left <= best_moves_left){
-            is_completed = false;
-            return -1;
+    if (moves_left <= best_moves_left)
+    {
+        is_completed = false; // Linha desnecessária? Jospy
+        return -1;
     }
+
     if (is_completed) // Só houver 1 número restante
-    {        
+    {
         is_completed = false;
         best_moves_left = moves_left;
+
         return best_moves_left;
-        
     }
 
     if (moves_left == 0)
         return -1;
 
-    if (last_move != "Left" || has_changed)
-    {
-        has_changed = false;
-        *iterator++ = Recursion(MoveLeft(matrix), moves_left - 1, moves + 1, "Left");
-    }
-
     if (last_move != "Right" || has_changed)
     {
         has_changed = false;
         *iterator++ = Recursion(MoveRight(matrix), moves_left - 1, moves + 1, "Right");
+    }
+
+    if (last_move != "Down" || has_changed) // Mexi isto para segundo caso pq se n é direita qual a likelyhood de ser esquerda? Jospy
+    {
+        has_changed = false;
+        *iterator = Recursion(MoveDown(matrix), moves_left - 1, moves + 1, "Down");
+    }
+
+    if (last_move != "Left" || has_changed)
+    {
+        has_changed = false;
+        *iterator++ = Recursion(MoveLeft(matrix), moves_left - 1, moves + 1, "Left");
     }
 
     if (last_move != "Up" || has_changed)
@@ -233,19 +240,11 @@ int Recursion(vector<vector<int>> matrix, int moves_left, int moves, string last
         *iterator++ = Recursion(MoveUp(matrix), moves_left - 1, moves + 1, "Up");
     }
 
-    if (last_move != "Down" || has_changed)
-    {
-        has_changed = false;
-        *iterator = Recursion(MoveDown(matrix), moves_left - 1, moves + 1, "Down");
-    }
-
-
-    return *max_element(child.begin(), child.end());
+    return *max_element(child.begin(), child.end()); // Se n mudar nada precisamos de fazer isto à mesma ou basta return -1? Jospy
 }
 
 void MainMatrices()
 {
-
     string line;
     int max_moves;
     vector<vector<int>> matrix;
@@ -337,9 +336,16 @@ int main()
     8 4 0 0
     0 0 4 0
 
-    */
+*/
 
 /* 
-    a pedido de josphze
-    https://google.github.io/styleguide/cppguide.html#Variable_Names 
-    */
+a pedido de josphze
+https://google.github.io/styleguide/cppguide.html#Variable_Names 
+*/
+
+// Acho que deviamos refazer os MoveX e Rotates tmb maybe para tornar a matriz mais eficiente
+// Maybe até usar map's ou algo do género como o Shiny tinha dito, maybe matriz linear tmb
+// Ou ent a cena que o Rui tinha perguntado sobre pesquisa horizontal ate X, dps vertical
+// Also n consegui perceber nada dos MoveX's, tá bué confuso e sem comments é fdd
+// Mas dps esclarecemos isso
+// Jospy
