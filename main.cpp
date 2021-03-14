@@ -285,10 +285,10 @@ vector<int> MoveDown(vector<int> matrix)
 
 void Recursion(vector<int> matrix, int moves_left, short last_move)
 {
-    if (is_completed) // Só houver 1 número restante
+    if (is_completed) // Solução melhor que a existente
     {
         is_completed = false;
-        best_moves_left = moves_left; // Acho que nao precisamos dos returns ent XD
+        best_moves_left = moves_left;
     }
 
     else if (moves_left > 0 && moves_left >= moves_needed && moves_left > best_moves_left + 1)
@@ -340,8 +340,6 @@ void MainMatrices()
         best_moves_left = -1;
         moves_needed = log2(max_value / max_atual);
         Recursion(matrix, max_moves, -1);
-
-        //cout << "Yo?" << endl;
 
         if (best_moves_left == -1)
             cout << "no solution" << endl;
