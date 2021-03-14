@@ -328,19 +328,20 @@ void MainMatrices()
 {
     int max_moves;
     vector<int> matrix;
+    double intpart;
 
     cin >> row_size >> max_moves;
 
     matrix = ReadMatrix();
 
-    double intpart;
+    moves_needed = log2(max_value / max_atual);
 
-    if (modf(log2(max_value), &intpart) == 0.0)
+    if (modf(log2(max_value), &intpart) == 0.0 && moves_needed <= max_moves)
     {
         best_moves_left = -1;
-        moves_needed = log2(max_value / max_atual);
-        Recursion(matrix, max_moves, -1);
 
+        Recursion(matrix, max_moves, -1);
+    
         if (best_moves_left == -1)
             cout << "no solution" << endl;
 
