@@ -17,6 +17,8 @@ int max_value = 0;
 int max_atual = 0;
 int best_moves_left;
 
+float moves_needed;
+
 bool is_completed = false;
 bool has_changed = false;
 
@@ -31,12 +33,13 @@ void PrintMatrix(vector<int> matrix)
 
     auto inicio = matrix.begin();
 
-    for (int i = 0; i < row_size * row_size; i++){
+    for (int i = 0; i < row_size * row_size; i++)
+    {
 
         cout << *(inicio + i);
 
-		(i + 1) % row_size == 0 ? cout << endl : cout << ' ';
-	}
+        (i + 1) % row_size == 0 ? cout << endl : cout << ' ';
+    }
 }
 
 vector<int> ReadMatrix()
@@ -44,63 +47,68 @@ vector<int> ReadMatrix()
     vector<int> matrix(row_size * row_size);
 
     string line;
-	int n;
+    int n;
 
     for (auto it = matrix.begin(); it != matrix.end(); it++)
     {
-		cin >> n;
-		*it = n;
+        cin >> n;
+        *it = n;
         max_value += n;
 
-		if (max_atual < n)
-			max_atual = n;
+        if (max_atual < n)
+            max_atual = n;
     }
+
     return matrix;
 }
 
 vector<int> MoveLeft(vector<int> matrix)
 {
     auto matrix_iterator = matrix.begin();
-	vector<int>::iterator position_iterator;
-	int last_number, first_position, position;
+    vector<int>::iterator position_iterator;
+    int last_number, first_position, position;
 
     for (int i = 0; i < row_size * row_size; i += row_size)
-	{
+    {
         last_number = -1;
         first_position = i;
 
         for (int j = 0; j < row_size; j++)
-		{
+        {
             position = i + j;
             position_iterator = matrix_iterator + position;
-			
+
             if (*position_iterator != 0)
-			{   
-				if (*position_iterator == last_number)
-				{   
-                    auto multiplier_iterator = (matrix_iterator + first_position - 1);
-					*multiplier_iterator *= 2;
+            {
+                if (*position_iterator == last_number)
+                {
+                    auto multiplied_iterator = (matrix_iterator + first_position - 1);
+                    *multiplied_iterator *= 2;
                     last_number = -1;
-					*position_iterator = 0;
+                    *position_iterator = 0;
 
                     has_changed = true;
-                    is_completed = *multiplier_iterator == max_value;
-                    if (max_atual < *multiplier_iterator)
-						max_atual = *multiplier_iterator;
-				}
-                
+                    is_completed = *multiplied_iterator == max_value;
+
+                    if (max_atual < *multiplied_iterator)
+                    {
+                        max_atual = *multiplied_iterator;
+                        moves_needed = log2(max_value / max_atual);
+                    }
+                }
+
                 else if (position != first_position)
-				{
-					last_number = *(position_iterator);
+                {
+                    last_number = *(position_iterator);
                     *(matrix_iterator + first_position) = last_number;
                     *position_iterator = 0;
-                	first_position++;
+                    first_position++;
                 }
-				
+
                 else
-				{
+                {
                     last_number = *(position_iterator);
-					first_position++;
+                    first_position++;
                 }
             }
         }
@@ -112,46 +120,50 @@ vector<int> MoveLeft(vector<int> matrix)
 vector<int> MoveRight(vector<int> matrix)
 {
     auto matrix_iterator = matrix.begin();
-	vector<int>::iterator position_iterator;  
-	int last_number, first_position, position;
+    vector<int>::iterator position_iterator;
+    int last_number, first_position, position;
 
     for (int i = 0; i < row_size * row_size; i += row_size)
-	{
+    {
         last_number = -1;
         first_position = i + row_size - 1;
 
         for (int j = row_size - 1; j >= 0; j--)
-		{
+        {
             position = i + j;
             position_iterator = matrix_iterator + position;
-			
+
             if (*position_iterator != 0)
-			{   
-				if (*position_iterator == last_number)
-				{
-					auto multiplier_iterator = (matrix_iterator + first_position + 1);
-                    *multiplier_iterator *= 2;
+            {
+                if (*position_iterator == last_number)
+                {
+                    auto multiplied_iterator = (matrix_iterator + first_position + 1);
+                    *multiplied_iterator *= 2;
                     last_number = -1;
-					*position_iterator = 0;
+                    *position_iterator = 0;
 
                     has_changed = true;
-                    is_completed = *multiplier_iterator == max_value;
-                    if (max_atual < *multiplier_iterator)
-						max_atual = *multiplier_iterator;
-				}
-                
+                    is_completed = *multiplied_iterator == max_value;
+
+                    if (max_atual < *multiplied_iterator)
+                    {
+                        max_atual = *multiplied_iterator;
+                        moves_needed = log2(max_value / max_atual);
+                    }
+                }
+
                 else if (position != first_position)
-				{
-					last_number = *(position_iterator);
+                {
+                    last_number = *(position_iterator);
                     *(matrix_iterator + first_position) = last_number;
                     *position_iterator = 0;
-                	first_position--;
+                    first_position--;
                 }
-				
+
                 else
-				{
+                {
                     last_number = *(position_iterator);
-					first_position--;
+                    first_position--;
                 }
             }
         }
@@ -163,46 +175,50 @@ vector<int> MoveRight(vector<int> matrix)
 vector<int> MoveUp(vector<int> matrix)
 {
     auto matrix_iterator = matrix.begin();
-	vector<int>::iterator position_iterator;  
-	int last_number, first_position, position;
+    vector<int>::iterator position_iterator;
+    int last_number, first_position, position;
 
     for (int i = 0; i < row_size; i++)
-	{
+    {
         last_number = -1;
         first_position = i;
 
-        for (int j = 0; j < row_size * row_size; j+= row_size)
-		{
+        for (int j = 0; j < row_size * row_size; j += row_size)
+        {
             position = i + j;
             position_iterator = matrix_iterator + position;
-			
+
             if (*position_iterator != 0)
-			{   
-				if (*position_iterator == last_number)
-				{
-                    auto multipier_iterator = (matrix_iterator + first_position - row_size);
-                    *multipier_iterator *= 2;
+            {
+                if (*position_iterator == last_number)
+                {
+                    auto multiplied_iterator = (matrix_iterator + first_position - row_size);
+                    *multiplied_iterator *= 2;
                     last_number = -1;
-					*position_iterator = 0;
+                    *position_iterator = 0;
 
                     has_changed = true;
-                    is_completed = *multipier_iterator == max_value;
-                    if (max_atual < *multipier_iterator)
-						max_atual = *multipier_iterator;
-				}
-                
+                    is_completed = *multiplied_iterator == max_value;
+
+                    if (max_atual < *multiplied_iterator)
+                    {
+                        max_atual = *multiplied_iterator;
+                        moves_needed = log2(max_value / max_atual);
+                    }
+                }
+
                 else if (position != first_position)
-				{
+                {
                     last_number = *(position_iterator);
                     *(matrix_iterator + first_position) = last_number;
                     *position_iterator = 0;
-                	first_position += row_size;
+                    first_position += row_size;
                 }
-				
+
                 else
-				{
+                {
                     last_number = *(position_iterator);
-					first_position += row_size;
+                    first_position += row_size;
                 }
             }
         }
@@ -214,47 +230,51 @@ vector<int> MoveUp(vector<int> matrix)
 vector<int> MoveDown(vector<int> matrix)
 {
     auto matrix_iterator = matrix.begin();
-	vector<int>::iterator position_iterator;  
-	int last_number, first_position, position;
+    vector<int>::iterator position_iterator;
+    int last_number, first_position, position;
 
     for (int i = 0; i < row_size; i++)
-	{
+    {
         last_number = -1;
         first_position = i + row_size * (row_size - 1);
 
         for (int j = row_size * (row_size - 1); j >= 0; j -= row_size)
-		{
+        {
             position = i + j;
             position_iterator = matrix_iterator + position;
-			
+
             if (*position_iterator != 0)
-			{   
-				if (*position_iterator == last_number)
-				{
-                    
-                    auto multipier_iterator = (matrix_iterator + first_position + row_size);
-                    *multipier_iterator *= 2;
+            {
+                if (*position_iterator == last_number)
+                {
+
+                    auto multiplied_iterator = (matrix_iterator + first_position + row_size);
+                    *multiplied_iterator *= 2;
                     last_number = -1;
-					*position_iterator = 0;
+                    *position_iterator = 0;
 
                     has_changed = true;
-                    is_completed = *multipier_iterator == max_value;
-                    if (max_atual < *multipier_iterator)
-						max_atual = *multipier_iterator;
-				}
-                
+                    is_completed = *multiplied_iterator == max_value;
+
+                    if (max_atual < *multiplied_iterator)
+                    {
+                        max_atual = *multiplied_iterator;
+                        moves_needed = log2(max_value / max_atual);
+                    }
+                }
+
                 else if (position != first_position)
-				{
+                {
                     last_number = *(position_iterator);
                     *(matrix_iterator + first_position) = last_number;
                     *position_iterator = 0;
-                	first_position -= row_size;
+                    first_position -= row_size;
                 }
-				
+
                 else
-				{
+                {
                     last_number = *(position_iterator);
-					first_position -= row_size;
+                    first_position -= row_size;
                 }
             }
         }
@@ -263,53 +283,45 @@ vector<int> MoveDown(vector<int> matrix)
     return matrix;
 }
 
-int Recursion(vector<int> matrix, int moves_left, int moves, string last_move)
+void Recursion(vector<int> matrix, int moves_left, short last_move)
 {
-    vector<int> child(4, -1);
-    auto iterator = child.begin();
-
-    if (moves_left <= best_moves_left || log2(max_value / max_atual) > moves_left)  // Se a solução atual for pior
-    {
-        is_completed = false;
-        return -1;
-    }
-
     if (is_completed) // Só houver 1 número restante
     {
         is_completed = false;
-        best_moves_left = moves_left;
-
-        return best_moves_left;
+        best_moves_left = moves_left; // Acho que nao precisamos dos returns ent XD
     }
 
-    if (moves_left == 0)
-        return -1;
-
-    if (last_move != "Right" || has_changed)
+    else if (moves_left > 0 && moves_left >= moves_needed && moves_left > best_moves_left + 1)
     {
-        has_changed = false;
-        *iterator++ = Recursion(MoveRight(matrix), moves_left - 1, moves + 1, "Right");
-    }
+        // Last Move -> 1 = Right
+        //              2 = Down
+        //              3 = Left
+        //              4 = Up
 
-    if (last_move != "Down" || has_changed)
-    {
-        has_changed = false;
-        *iterator++ = Recursion(MoveDown(matrix), moves_left - 1, moves + 1, "Down");
-    }
+        if (last_move != 1 || has_changed)
+        {
+            has_changed = false;
+            Recursion(MoveRight(matrix), moves_left - 1, 1);
+        }
 
-    if (last_move != "Left" || has_changed)
-    {
-        has_changed = false;
-        *iterator++ = Recursion(MoveLeft(matrix), moves_left - 1, moves + 1, "Left");
-    }
+        if (last_move != 2 || has_changed)
+        {
+            has_changed = false;
+            Recursion(MoveDown(matrix), moves_left - 1, 2);
+        }
 
-    if (last_move != "Up" || has_changed)
-    {
-        has_changed = false;
-        *iterator = Recursion(MoveUp(matrix), moves_left - 1, moves + 1, "Up");
-    }
+        if (last_move != 3 || has_changed)
+        {
+            has_changed = false;
+            Recursion(MoveLeft(matrix), moves_left - 1, 3);
+        }
 
-    return iterator != child.begin() ? *max_element(child.begin(), child.end()) : -1;
+        if (last_move != 4 || has_changed)
+        {
+            has_changed = false;
+            Recursion(MoveUp(matrix), moves_left - 1, 4);
+        }
+    }
 }
 
 void MainMatrices()
@@ -320,14 +332,16 @@ void MainMatrices()
     cin >> row_size >> max_moves;
 
     matrix = ReadMatrix();
-    
+
     double intpart;
-    //TODO: make money moves
 
     if (modf(log2(max_value), &intpart) == 0.0)
     {
         best_moves_left = -1;
-        Recursion(matrix, max_moves, 0, "");
+        moves_needed = log2(max_value / max_atual);
+        Recursion(matrix, max_moves, -1);
+
+        //cout << "Yo?" << endl;
 
         if (best_moves_left == -1)
             cout << "no solution" << endl;
@@ -338,8 +352,6 @@ void MainMatrices()
 
     else
         cout << "no solution" << endl;
-
-
 }
 
 int main()
@@ -349,7 +361,6 @@ int main()
 
     int n_line;
     int num_matrices = 0;
-
 
     cin >> n_line;
 
@@ -403,10 +414,3 @@ int main()
 a pedido de josphze
 https://google.github.io/styleguide/cppguide.html#Variable_Names 
 */
-
-// Acho que deviamos refazer os MoveX e Rotates tmb maybe para tornar a matriz mais eficiente
-// Maybe até usar map's ou algo do género como o Shiny tinha dito, maybe matriz linear tmb
-// Ou ent a cena que o Rui tinha perguntado sobre pesquisa horizontal ate X, dps vertical
-// Also n consegui perceber nada dos MoveX's, tá bué confuso e sem comments é fdd
-// Mas dps esclarecemos isso
-// Jospy
