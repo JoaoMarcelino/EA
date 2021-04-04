@@ -285,41 +285,65 @@ vector<int> MoveDown(vector<int> matrix)
 
 void Recursion(vector<int> matrix, int moves_left, short last_move)
 {
+    bool local_has_changed = has_changed;
+    vector<int> aux;
+
     if (is_completed) // Solução melhor que a existente
     {
         is_completed = false;
         best_moves_left = moves_left;
     }
 
-    else if (moves_left > 0 && moves_left >= moves_needed && moves_left > best_moves_left + 1)
+    else if (moves_left > 0 && moves_left >= moves_needed && moves_left > best_moves_left + 1 && last_move != 0)
     {
-        // Last Move -> 1 = Right
-        //              2 = Down
-        //              3 = Left
-        //              4 = Up
+        // Last Move -> 0001 = Right
+        //              0010 = Down
+        //              0100 = Left
+        //              1000 = Up
+        // Onde 1 representa que se pode fazer o move
 
-        if (last_move != 1 || has_changed)
+        if (last_move & 1 || local_has_changed)
         {
             has_changed = false;
-            Recursion(MoveRight(matrix), moves_left - 1, 1);
+            aux = MoveRight(matrix);
+
+            if (!has_changed)
+                Recursion(aux, moves_left - 1, last_move & 14); // XXXX and 1110
+            else
+                Recursion(aux, moves_left - 1, 15);
         }
 
-        if (last_move != 2 || has_changed)
+        if (last_move & 2 || local_has_changed)
         {
             has_changed = false;
-            Recursion(MoveDown(matrix), moves_left - 1, 2);
+            aux = MoveDown(matrix);
+
+            if (!has_changed)
+                Recursion(aux, moves_left - 1, last_move & 13); // XXXX and 1101
+            else
+                Recursion(aux, moves_left - 1, 15);
         }
 
-        if (last_move != 3 || has_changed)
+        if (last_move & 4 || local_has_changed)
         {
             has_changed = false;
-            Recursion(MoveLeft(matrix), moves_left - 1, 3);
+            aux = MoveLeft(matrix);
+
+            if (!has_changed)
+                Recursion(aux, moves_left - 1, last_move & 11); // XXXX and 1011
+            else
+                Recursion(aux, moves_left - 1, 15);
         }
 
-        if (last_move != 4 || has_changed)
+        if (last_move & 8 || local_has_changed)
         {
             has_changed = false;
-            Recursion(MoveUp(matrix), moves_left - 1, 4);
+            aux = MoveUp(matrix);
+
+            if (!has_changed)
+                Recursion(aux, moves_left - 1, last_move & 7); // XXXX and 0111
+            else
+                Recursion(aux, moves_left - 1, 15);
         }
     }
 }
@@ -340,8 +364,8 @@ void MainMatrices()
     {
         best_moves_left = -1;
 
-        Recursion(matrix, max_moves, -1);
-    
+        Recursion(matrix, max_moves, 15);
+
         if (best_moves_left == -1)
             cout << "no solution" << endl;
 
@@ -407,9 +431,4 @@ int main()
     8 4 0 0
     0 0 4 0
 
-*/
-
-/* 
-a pedido de josphze
-https://google.github.io/styleguide/cppguide.html#Variable_Names 
 */
