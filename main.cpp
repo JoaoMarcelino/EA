@@ -22,10 +22,32 @@ float moves_needed;
 bool is_completed = false;
 bool has_changed = false;
 
-/*
-unordered_map< vector<int>, vector<int> > hashtable_left;
-unordered_map< vector<int>, vector<int> > hashtable_right;
-*/
+struct matrix_info {
+    vector<int> matrix;
+    bool is_completed = false;
+    bool has_changed = false;
+    //bool has_moved = false; 
+};
+
+class uint32_vector_hasher {
+public:
+    std::size_t operator()(std::vector<int32_t> const& vec) const {
+        std::size_t seed = vec.size();
+        for(auto& i : vec) {
+            seed ^= i + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+        }
+        return seed;
+    }
+};
+
+
+typedef unordered_map< vector<int>, matrix_info, uint32_vector_hasher> hashtable;
+
+hashtable left_table;
+hashtable right_table;
+hashtable down_table;
+hashtable up_table;
+
 
 void PrintMatrix(vector<int> matrix)
 {
@@ -62,7 +84,7 @@ vector<int> ReadMatrix()
     return matrix;
 }
 
-vector<int> MoveLeft(vector<int> matrix)
+void MoveLeft(vector<int> &matrix)
 {
     auto matrix_iterator = matrix.begin();
     vector<int>::iterator position_iterator;
@@ -113,11 +135,9 @@ vector<int> MoveLeft(vector<int> matrix)
             }
         }
     }
-
-    return matrix;
 }
 
-vector<int> MoveRight(vector<int> matrix)
+void MoveRight(vector<int> &matrix)
 {
     auto matrix_iterator = matrix.begin();
     vector<int>::iterator position_iterator;
@@ -169,10 +189,9 @@ vector<int> MoveRight(vector<int> matrix)
         }
     }
 
-    return matrix;
 }
 
-vector<int> MoveUp(vector<int> matrix)
+void MoveUp(vector<int> &matrix)
 {
     auto matrix_iterator = matrix.begin();
     vector<int>::iterator position_iterator;
@@ -224,10 +243,9 @@ vector<int> MoveUp(vector<int> matrix)
         }
     }
 
-    return matrix;
 }
 
-vector<int> MoveDown(vector<int> matrix)
+void MoveDown(vector<int> &matrix)
 {
     auto matrix_iterator = matrix.begin();
     vector<int>::iterator position_iterator;
@@ -280,18 +298,31 @@ vector<int> MoveDown(vector<int> matrix)
         }
     }
 
-    return matrix;
 }
 
-void Recursion(vector<int> matrix, int moves_left, short last_move)
+void ChangeVariables(matrix_info &info){
+    has_changed = info.has_changed;
+    //has_moved = info.has_moved;
+    is_completed = info.is_completed;
+}
+
+void setVariables(matrix_info &info){
+    info.has_changed = has_changed;
+    //info.has_moved = has_moved;
+    info.is_completed = is_completed;
+}
+
+
+void Recursion(vector<int> matrix, int moves_left, short last_move, short four_moves_rule)
 {
+    matrix_info aux;
     if (is_completed) // Solução melhor que a existente
     {
         is_completed = false;
         best_moves_left = moves_left;
     }
 
-    else if (moves_left > 0 && moves_left >= moves_needed && moves_left > best_moves_left + 1)
+    else if (moves_left > 0 && moves_left >= moves_needed && moves_left > best_moves_left + 1 && four_moves_rule != 4)
     {
         // Last Move -> 1 = Right
         //              2 = Down
@@ -301,25 +332,105 @@ void Recursion(vector<int> matrix, int moves_left, short last_move)
         if (last_move != 1 || has_changed)
         {
             has_changed = false;
-            Recursion(MoveRight(matrix), moves_left - 1, 1);
+            
+            hashtable::iterator finder = right_table.find(matrix);
+
+            if(finder != right_table.end()){
+                aux = finder->second;
+                ChangeVariables(aux);
+                cout << "here" << endl;
+            
+
+            }else{
+                //aux.matrix = MoveRight(matrix);
+                aux.matrix = matrix;
+                MoveRight(aux.matrix);
+
+                setVariables(aux);
+
+                right_table[matrix] = aux;
+            }
+
+            if (!has_changed) 
+                Recursion(aux.matrix, moves_left - 1, 1, four_moves_rule + 1);
+            else 
+                Recursion(aux.matrix, moves_left - 1, 1, 0);
+                
+            
         }
 
         if (last_move != 2 || has_changed)
         {
             has_changed = false;
-            Recursion(MoveDown(matrix), moves_left - 1, 2);
+
+            hashtable::iterator finder = down_table.find(matrix);
+            
+            if(finder != down_table.end()){
+                aux = finder->second;
+                ChangeVariables(aux);
+            }else{
+                //aux.matrix = MoveDown(matrix);
+                aux.matrix = matrix;
+                MoveDown(aux.matrix);
+
+                setVariables(aux);
+
+                down_table[matrix] = aux;
+            }
+            
+            if (!has_changed) 
+                Recursion(aux.matrix, moves_left - 1, 2, four_moves_rule + 1);
+            else 
+                Recursion(aux.matrix, moves_left - 1, 2, 0);
         }
 
         if (last_move != 3 || has_changed)
         {
             has_changed = false;
-            Recursion(MoveLeft(matrix), moves_left - 1, 3);
+
+            hashtable::iterator finder = left_table.find(matrix);
+            if(finder != left_table.end()){
+                aux = finder->second;
+                ChangeVariables(aux);
+            }else{ 
+                //aux.matrix = MoveLeft(matrix);
+                aux.matrix = matrix;
+                MoveLeft(aux.matrix);
+
+                setVariables(aux);
+
+                left_table[matrix] = aux;
+
+            }
+            
+            if (!has_changed) 
+                Recursion(aux.matrix, moves_left - 1, 3, four_moves_rule + 1);
+            else 
+                Recursion(aux.matrix, moves_left - 1, 3, 0);
         }
 
         if (last_move != 4 || has_changed)
         {
             has_changed = false;
-            Recursion(MoveUp(matrix), moves_left - 1, 4);
+            hashtable::iterator finder = up_table.find(matrix);
+            if(finder != up_table.end()){
+                aux = finder->second;
+                ChangeVariables(aux);
+            }else{ 
+                //aux.matrix = MoveUp(matrix);
+                aux.matrix = matrix;
+                MoveUp(aux.matrix);
+
+                setVariables(aux);
+
+                up_table[matrix] = aux;
+
+            }
+            
+            if (!has_changed) 
+                Recursion(aux.matrix, moves_left - 1, 4, four_moves_rule + 1);
+            else 
+                Recursion(aux.matrix, moves_left - 1, 4, 0);
         }
     }
 }
@@ -340,7 +451,7 @@ void MainMatrices()
     {
         best_moves_left = -1;
 
-        Recursion(matrix, max_moves, -1);
+        Recursion(matrix, max_moves, -1, 0);
     
         if (best_moves_left == -1)
             cout << "no solution" << endl;
