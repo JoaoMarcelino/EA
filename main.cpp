@@ -321,6 +321,7 @@ void Recursion(vector<int> matrix, int moves_left, short last_move)
             if (finder != right_table.end())
             {
                 aux = finder->second;
+
                 if (moves_left <= aux.moves_left)
                     return;
                 else
