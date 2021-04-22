@@ -23,6 +23,7 @@ int tabela_h, tabela_w;
 vector<vector<int>> tabelha;
 vector<vector<int>> soma;
 
+//1 000 000 007
 int mod =  1000000007; 
 
 // FUNCÕES DISPONIBILIZADAS PELO PROFESSOR
@@ -65,29 +66,35 @@ int TabelhaAdd(int fila, int coluna)
     return tabelha[fila][coluna] = soma;
 }
 
-int SomaAdd(int fila, int coluna)
-{
-    return soma[fila][coluna] = soma[fila][coluna - 1] + tabelha[fila][coluna];
-}
 
-void addArcs(int &count, int linha, int coluna){
-    /*int aux += TabelhaAdd(linha, coluna);
-
-	soma[linha][coluna] = aux;
-    */
+int addArcs(int &row_count, int linha, int coluna){
+    int count = 0;
     int aux = TabelhaAdd(linha, coluna);
-     SomaAdd(linha, coluna);
+    row_count= row_count + aux;
+
+	soma[linha][coluna] = row_count;
+    
+
+    if(aux == 0){
+        return 0;
+    }
+
     for (int i = 1; i < size_block ; i++){
 
         if (linha - i < 0)
-			break;
+            break;
 
         /*
         cout << "tabela "<< linha +  size_block << " : "<< coluna+1 <<" (" << aux << ")";
         cout <<"multiplicado por soma " << linha - i   +  size_block<< " : "<< number_blocks - coluna - 1 <<" (" << soma[linha - i][number_blocks - coluna -2] << ")\n";
         */
-        count += aux * soma[linha - i][number_blocks - coluna -2];
+
+        //count += aux * soma[linha - i][number_blocks - coluna -2];
+        count = mod_add(count, aux * soma[linha - i][number_blocks - coluna -2], mod);
     }
+
+
+    return count;
 
 }
 
@@ -98,19 +105,21 @@ int ArchBuilder(){
     soma[0] = vector(tabela_w, 1); 
     int count = 0;
     for (int i = 1; i < tabela_w; i++){
+        int row_count = 0;
         for (int j = 1; j < tabela_h; j++){
             
-            addArcs(count, i , j);
+            //count += addArcs(row_count, i , j);
+            count = mod_add(count, addArcs(row_count, i , j), mod);
             //cout << "Contas de " << i <<" + " << j<<": " << count << endl;
             
         }
     }
-    /*
+    
     cout << "Tabelha" << endl;
     printTabelha(tabelha,max_height - size_block + 1, number_blocks);
     cout<< "Soma" << endl;
     printTabelha(soma, max_height - size_block + 1, number_blocks);
-    */
+    
     return count;
 }
 
