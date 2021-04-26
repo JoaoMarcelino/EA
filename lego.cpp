@@ -70,28 +70,29 @@ long long int TabelhaAdd(int fila,int coluna){
     return tabelha[fila][coluna] = sum;
 }
 
-long long int SomaAdd(long long int row_count,int fila,int coluna){
+
+
+long long int SomaAdd( int fila, int coluna){
     long long int sum = 0;
     long long int sub = 0;
 
-     if (fila - size_block + 1 < 0 ){
-         sub = soma[fila - 1][coluna];
-         //cout << "Contas de [" << fila <<", " << coluna <<"]: " << soma[fila - 1][coluna]  << " - "<<  0<<" + " << row_count << endl;
+    if(fila == 0){
+        sub = 0;
     }
-    else{
-        sub =mod_sub(soma[fila - 1][coluna], soma[fila - size_block + 1][coluna]);
-        //cout << "Contas de [" << fila <<", " << coluna <<"]: " << soma[fila - 1][coluna]  << " - "<< soma[fila - size_block][coluna]<<" + " << row_count << endl;
-    }
+    else if (fila - size_block + 1 < 0 ){
+        sub = soma[fila][coluna + 1];
+        //cout << "SUB de [" << fila <<", " << coluna <<"]: " << soma[fila][coluna + 1]  << " - NULL "<<" + " << soma[fila][coluna] << endl;
 
-    sum=  mod_add(sub, row_count);
+     }
+     else {
+        //cout << "SUB de [" << fila <<", " << coluna <<"]: " << soma[fila][coluna + 1]  << " - "<< soma[fila - size_block + 1][coluna]<<" + " << soma[fila][coluna] << endl;
+        sub = mod_sub(soma[fila][coluna + 1], soma[fila - size_block + 1][coluna]);
+     }
+    
+    sum =mod_add(soma[fila][coluna], sub);
 
-    //cout << sum << endl;
-
-    return soma[fila][coluna] = sum;
-
-
+    return sum;
 }
-
 
 long long int  addArcs(long long int  &row_count, int  linha, int  coluna){
     long long int  count = 0;
@@ -104,17 +105,8 @@ long long int  addArcs(long long int  &row_count, int  linha, int  coluna){
     
     row_count = mod_add(row_count, aux);
 
-    for (int  i = 1; i < size_block ; i++){
-        if (linha - i < 0)
-            break;
-
-        if (number_blocks - coluna -2 >= 0){
-            temp = mod_add(temp, soma[linha - i][number_blocks - coluna -2]);
-        }
-    }
-
-    count = mod_add(count, aux * soma[linha - 1][number_blocks - coluna -2]);/*erro*/
-    //count = mod_add(count, aux *temp);
+    temp = SomaAdd(linha - 1, number_blocks - coluna - 2);
+    count = mod_add(count, aux *temp);
 
     return count;
 }
@@ -123,8 +115,7 @@ long long int  addArcs(long long int  &row_count, int  linha, int  coluna){
 long long int  ArchBuilder(){
 
     tabelha[0][0] = 1;
-    soma[0] = vector<unsigned int>(tabela_w + 1, 1); 
-
+    soma[0] = vector<unsigned int>(tabela_h + 1, 1);
     long long int  count = 0;
     int initial_j = 1;
 
@@ -145,13 +136,12 @@ long long int  ArchBuilder(){
 
                 else
                 {
-                    //if (j == initial_j) return count; //nao da para printar com isto
+                    if (j == initial_j) return count; //nao da para printar com isto
                     isWorth = false;
                 }
 
             }
-            SomaAdd(row_count, i, j);  /*erro*/
-            //soma[i][j]= row_count;
+            soma[i][j]= row_count;
 
         }
         if (i / (size_block - 1) >= initial_j){
@@ -159,14 +149,17 @@ long long int  ArchBuilder(){
 
             if (initial_j >= number_blocks) break;
         }
+
+        soma[i][tabela_h]= row_count;
+
     }
 
     /*
     cout << "Tabelha" << endl;
     printTabelha(tabelha, tabela_w, tabela_h);
     cout<< "Soma" << endl;
-    printTabelha(soma, tabela_w, tabela_h);
-   */ 
+    printTabelha(soma, tabela_w, tabela_h + 1);
+   */
    
     return count;
 }
@@ -188,11 +181,13 @@ int main(){
         tabela_h = number_blocks;
 
         tabelha = vector<vector<unsigned int>>(tabela_w, vector<unsigned int>(tabela_h, 0));
-        soma = vector<vector<unsigned int>>(tabela_w, vector<unsigned int>(tabela_h, 0));
+        soma = vector<vector<unsigned int>>(tabela_w, vector<unsigned int>(tabela_h + 1, 0));
 
         result = ArchBuilder();
 
         cout << result << endl;
+        
+       
     }
 
     return 0;
