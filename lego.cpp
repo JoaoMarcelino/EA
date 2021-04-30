@@ -17,7 +17,7 @@ vector<vector<int>> soma;
 
 int mod = 1000000007;
 
-int mod_abs(long a)
+int mod_abs(int a)
 {
     return ((a % mod) + mod) % mod;
 }
@@ -30,6 +30,11 @@ int mod_add(int a, int b)
 int mod_sub(int a, int b)
 {
     return mod_add(a, -b);
+}
+
+int mod_mul(long a, long b)
+{
+    return (a * b) % mod;
 }
 
 int CalculaArcos(int linha, int coluna)
@@ -71,7 +76,7 @@ int ContaArcos(int &total_linha, int linha, int coluna)
 
     total_linha = mod_add(total_linha, arcos_possiveis);
 
-    return mod_abs(arcos_possiveis * (long)arcos_complementares);
+    return mod_mul(arcos_possiveis, arcos_complementares);
 }
 
 int ArchBuilder()
