@@ -1,193 +1,148 @@
 #include <iostream>
-#include <sstream>
 
-#include <algorithm>
-#include <iterator>
-#include <map>
-#include <string>
 #include <vector>
-#include <unordered_map>
-
-#include <math.h>
 
 using namespace std;
 
 /*
- * number_blocks = n
- * size_block = h
- * max_height = H
+ * numero_blocos = n
+ * tamanho_bloco = h
+ * altura_max = H
  */
-int number_blocks, size_block, max_height;
+int numero_blocos, tamanho_bloco, altura_max;
 
 int tabela_h, tabela_w;
-vector<vector<unsigned int>> tabelha;
-vector<vector<unsigned int>> soma;
+vector<vector<int>> arcos;
+vector<vector<int>> soma;
 
-//1 000 000 007
-long long int  mod =  1000000007; 
+int mod = 1000000007;
 
-// FUNCÕES DISPONIBILIZADAS PELO PROFESSOR
-
-long long int  mod_abs(long long int  a) {
- 	return ((a % mod) + mod) % mod;
-}
-
-long long int  mod_add(long long int  a, long long int  b) {
- 	return (mod_abs(a) + mod_abs(b)) % mod;
-}
-
-long long int  mod_sub(long long int  a, long long int  b) {
-	return mod_add(a, -b);
-}
-
-void printTabelha(vector<vector<unsigned int>> tabelha , int  width,  int  height)
+int mod_abs(long a)
 {
-    for ( int  i = 0; i < width; i++)
-	{
-        for ( int  j = 0; j < height; j++)
-            cout << tabelha[i][j] << " ";
-        cout << endl;
-    }
+    return ((a % mod) + mod) % mod;
 }
 
-
-long long int TabelhaAdd(int fila,int coluna){
-    long long int sum = 0;
-    long long int sub = 0;
-    
-    if (fila - size_block < 0 ){
-        sub = tabelha[fila -1][coluna];
-        //cout << "sub1- "<< sub<< endl;
-    }
-    else{
-        sub =mod_sub(tabelha[fila - 1][coluna], tabelha[fila - size_block][coluna - 1]);
-    }
-    
-    sum =  mod_add(sub, tabelha[fila - 1][coluna - 1]);
-
-    //cout << "Contas de " << fila <<" + " << coluna <<": " << sub  << " - " << soma << endl;
-
-    return tabelha[fila][coluna] = sum;
+int mod_add(int a, int b)
+{
+    return (mod_abs(a) + mod_abs(b)) % mod;
 }
 
+int mod_sub(int a, int b)
+{
+    return mod_add(a, -b);
+}
 
+int CalculaArcos(int linha, int coluna)
+{
+    int sub;
 
-long long int SomaAdd( int fila, int coluna){
-    long long int sum = 0;
-    long long int sub = 0;
+    if (linha - tamanho_bloco < 0)
+        sub = arcos[linha - 1][coluna];
 
-    if(fila == 0){
+    else
+        sub = mod_sub(arcos[linha - 1][coluna], arcos[linha - tamanho_bloco][coluna - 1]);
+
+    return arcos[linha][coluna] = mod_add(sub, arcos[linha - 1][coluna - 1]);
+}
+
+int CalculaSoma(int linha, int coluna)
+{
+    int sub;
+
+    if (linha == 0)
         sub = 0;
-    }
-    else if (fila - size_block + 1 < 0 ){
-        sub = soma[fila][coluna + 1];
-        //cout << "SUB de [" << fila <<", " << coluna <<"]: " << soma[fila][coluna + 1]  << " - NULL "<<" + " << soma[fila][coluna] << endl;
 
-     }
-     else {
-        //cout << "SUB de [" << fila <<", " << coluna <<"]: " << soma[fila][coluna + 1]  << " - "<< soma[fila - size_block + 1][coluna]<<" + " << soma[fila][coluna] << endl;
-        sub = mod_sub(soma[fila][coluna + 1], soma[fila - size_block + 1][coluna]);
-     }
-    
-    sum =mod_add(soma[fila][coluna], sub);
+    else if (linha - tamanho_bloco + 1 < 0)
+        sub = soma[linha][coluna + 1];
 
-    return sum;
+    else
+        sub = mod_sub(soma[linha][coluna + 1], soma[linha - tamanho_bloco + 1][coluna]);
+
+    return mod_add(soma[linha][coluna], sub);
 }
 
-long long int  addArcs(long long int  &row_count, int  linha, int  coluna){
-    long long int  count = 0;
-    long long int  aux = TabelhaAdd(linha, coluna);
+int ContaArcos(int &total_linha, int linha, int coluna)
+{
+    int arcos_possiveis = CalculaArcos(linha, coluna);
+    int arcos_complementares = CalculaSoma(linha - 1, numero_blocos - coluna - 2);
 
-    long long int temp = 0;
-
-    if(aux == 0)
+    if (arcos_possiveis == 0)
         return 0;
-    
-    row_count = mod_add(row_count, aux);
 
-    temp = SomaAdd(linha - 1, number_blocks - coluna - 2);
-    count = mod_add(count, aux *temp);
+    total_linha = mod_add(total_linha, arcos_possiveis);
 
-    return count;
+    return mod_abs(arcos_possiveis * (long)arcos_complementares);
 }
 
+int ArchBuilder()
+{
+    arcos[0][0] = 1;
+    soma[0] = vector<int>(tabela_h + 1, 1);
 
-long long int  ArchBuilder(){
+    int total = 0;
+    int j_inicial = 1;
 
-    tabelha[0][0] = 1;
-    soma[0] = vector<unsigned int>(tabela_h + 1, 1);
-    long long int  count = 0;
-    int initial_j = 1;
+    for (int i = 1; i < tabela_w; i++)
+    {
+        int total_linha = 0;
+        bool is_max = false;
 
-    for (int  i = 1; i < tabela_w; i++){
+        for (int j = j_inicial; j < tabela_h; j++)
+        {
+            if (!is_max)
+            {
+                int arcs = ContaArcos(total_linha, i, j);
 
-        long long int  row_count = 0;
-        bool isWorth = true;
+                if (arcs == 0)
+                {
+                    if (j == j_inicial)
+                        return total;
 
-        for (int  j = initial_j; j < tabela_h; j++){
-            
-            if (isWorth){
-
-                long long int arcs = addArcs(row_count, i , j);
-
-                if(arcs != 0){
-                    count = mod_add(count, arcs);
+                    is_max = true;
                 }
 
                 else
-                {
-                    if (j == initial_j) return count; //nao da para printar com isto
-                    isWorth = false;
-                }
-
+                    total = mod_add(total, arcs);
             }
-            soma[i][j]= row_count;
 
-        }
-        if (i / (size_block - 1) >= initial_j){
-            initial_j++;
-
-            if (initial_j >= number_blocks) break;
+            soma[i][j] = total_linha;
         }
 
-        soma[i][tabela_h]= row_count;
+        if (i / (tamanho_bloco - 1) >= j_inicial)
+        {
+            j_inicial++;
 
+            if (j_inicial >= numero_blocos)
+                break;
+        }
+
+        soma[i][tabela_h] = total_linha;
     }
 
-    /*
-    cout << "Tabelha" << endl;
-    printTabelha(tabelha, tabela_w, tabela_h);
-    cout<< "Soma" << endl;
-    printTabelha(soma, tabela_w, tabela_h + 1);
-   */
-   
-    return count;
+    return total;
 }
 
-
-int main(){
-
+int main()
+{
     ios_base::sync_with_stdio(0);
     cin.tie(0);
 
-    int  number_cases, result;
-    cin >> number_cases;
+    int numero_casos, resultado;
+    cin >> numero_casos;
 
-    for(int  i = 0; i < number_cases; i++){
+    for (int i = 0; i < numero_casos; i++)
+    {
+        cin >> numero_blocos >> tamanho_bloco >> altura_max;
 
-        cin >> number_blocks >> size_block >> max_height;
+        tabela_w = altura_max - tamanho_bloco + 1;
+        tabela_h = numero_blocos;
 
-        tabela_w = max_height - size_block + 1;
-        tabela_h = number_blocks;
+        arcos = vector<vector<int>>(tabela_w, vector<int>(tabela_h, 0));
+        soma = vector<vector<int>>(tabela_w, vector<int>(tabela_h + 1, 0));
 
-        tabelha = vector<vector<unsigned int>>(tabela_w, vector<unsigned int>(tabela_h, 0));
-        soma = vector<vector<unsigned int>>(tabela_w, vector<unsigned int>(tabela_h + 1, 0));
+        resultado = ArchBuilder();
 
-        result = ArchBuilder();
-
-        cout << result << endl;
-        
-       
+        cout << resultado << endl;
     }
 
     return 0;
