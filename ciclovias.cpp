@@ -14,7 +14,7 @@ vector<vector<int>> circuitos;
 // Tarjan
 int t;
 stack<int> S;
-vector<int> onStack;
+vector<bool> onStack;
 vector<int> dfs;
 vector<int> low;
 
@@ -61,19 +61,16 @@ void printStack(stack<int> S)
     cout << endl;
 }
 
-vector<int> Tarjan(int v)
+void Tarjan(int v)
 {
-    int w;
-    vector<int> C;
-
     dfs[v - 1] = t;
     low[v - 1] = t;
     t++;
 
     S.push(v);
-    onStack.push_back(v);
+    onStack[v - 1] = true;
 
-    for (w = 1; w <= n_vertices; w++)
+    for (int w = 1; w <= n_vertices; w++)
     {
         if (matriz_adjacencia[v - 1][w - 1] != 0)
         {
@@ -83,22 +80,29 @@ vector<int> Tarjan(int v)
                 low[v - 1] = min(low[v - 1], low[w - 1]);
             }
 
-            else if (count(onStack.begin(), onStack.end(), w))
+            else if (onStack[w - 1])
                 low[v - 1] = min(low[v - 1], dfs[w - 1]);
         }
     }
 
     if (low[v - 1] == dfs[v - 1])
     {
-        onStack.clear();
+        vector<int> c = vector(0, 0);
+        int w;
+
         do
         {
             w = S.top();
             S.pop();
-            C.push_back(w);
+
+            onStack[w - 1] = false;
+            c.push_back(w);
+
         } while (w != v);
+
+        if (!c.empty() && c.size() > 1)
+            circuitos.push_back(c);
     }
-    return C;
 }
 
 // Funções auxiliares do Kruskal
@@ -231,20 +235,21 @@ int main()
 
         maior_circuito = 0;
         total_estrada = 0;
-        circuitos.clear();
+        circuitos = vector<vector<int>>(0, vector<int>(0, 0));
 
-        t = 1;
+        t = 0;
+        S = stack<int>();
         dfs = vector(n_vertices, -1);
         low = vector(n_vertices, -1);
+        onStack = vector(n_vertices, false);
 
         for (int i = 1; i <= n_vertices; i++)
         {
-            // Calcula um circuito
-            vector<int> scc = Tarjan(i);
-
-            // Exclui circuitos de tamanho inferior a 2
-            if (scc.size() > 1)
-                circuitos.push_back(scc);
+            if (dfs[i - 1] == -1)
+            {
+                // Calcula um circuito
+                Tarjan(i);
+            }
         }
 
         if (n_questoes >= 1)
