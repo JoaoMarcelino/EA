@@ -37,30 +37,6 @@ public:
     }
 };
 
-void printVector(vector<int> &vec)
-{
-    for (auto it = vec.begin(); it != vec.end() - 1; it++)
-        cout << *it << "\t";
-    cout << *(vec.end() - 1) << "\n";
-}
-
-void printMatriz(vector<vector<int>> &matriz)
-{
-    for (auto it = matriz.begin(); it != matriz.end(); it++)
-        printVector(*it);
-    cout << endl;
-}
-
-void printStack(stack<int> S)
-{
-    while (!S.empty())
-    {
-        cout << S.top() << "\t";
-        S.pop();
-    }
-    cout << endl;
-}
-
 void Tarjan(int v)
 {
     dfs[v - 1] = t;
@@ -130,9 +106,9 @@ void createUnion(int a, int b)
     link(find(a), find(b));
 }
 
-int comparaArestas(const Aresta &a, const Aresta &b)
+int comparaArestas(Aresta &a, Aresta &b)
 {
-    return a.tamanho <= b.tamanho;
+    return a.tamanho < b.tamanho;
 }
 
 vector<Aresta> getArestas(vector<int> circuito)
