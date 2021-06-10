@@ -325,7 +325,8 @@ void Recursion(vector<int> matrix, int moves_left, short last_move)
                 if (moves_left <= aux.moves_left)
                     return;
                 else
-                {
+                {   
+                    aux.moves_left = moves_left;
                     ChangeVariables(aux);
                     Recursion(aux.matrix, moves_left - 1, RIGHT);
                 }
@@ -358,6 +359,7 @@ void Recursion(vector<int> matrix, int moves_left, short last_move)
                     return;
                 else
                 {
+                    aux.moves_left = moves_left;
                     ChangeVariables(aux);
                     Recursion(aux.matrix, moves_left - 1, DOWN);
                 }
@@ -389,7 +391,8 @@ void Recursion(vector<int> matrix, int moves_left, short last_move)
                 if (moves_left <= aux.moves_left)
                     return;
                 else
-                {
+                {   
+                    aux.moves_left = moves_left;
                     ChangeVariables(aux);
                     Recursion(aux.matrix, moves_left - 1, LEFT);
                 }
@@ -422,6 +425,7 @@ void Recursion(vector<int> matrix, int moves_left, short last_move)
                     return;
                 else
                 {
+                    aux.moves_left = moves_left;
                     ChangeVariables(aux);
                     Recursion(aux.matrix, moves_left - 1, UP);
                 }
@@ -488,6 +492,12 @@ int main()
     {
         MainMatrices();
         max_value = 0;
+
+        left_table.clear();
+        right_table.clear();
+        down_table.clear();
+        up_table.clear();
+
     }
 
     return 0;
