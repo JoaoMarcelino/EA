@@ -14,7 +14,7 @@ vector<vector<int>> circuitos;
 // Tarjan
 int t;
 stack<int> S;
-vector<bool> onStack;
+vector<bool> on_stack;
 vector<int> dfs;
 vector<int> low;
 
@@ -44,7 +44,7 @@ void Tarjan(int v)
     t++;
 
     S.push(v);
-    onStack[v - 1] = true;
+    on_stack[v - 1] = true;
 
     for (int w = 1; w <= n_vertices; w++)
     {
@@ -56,7 +56,7 @@ void Tarjan(int v)
                 low[v - 1] = min(low[v - 1], low[w - 1]);
             }
 
-            else if (onStack[w - 1])
+            else if (on_stack[w - 1])
                 low[v - 1] = min(low[v - 1], dfs[w - 1]);
         }
     }
@@ -71,7 +71,7 @@ void Tarjan(int v)
             w = S.top();
             S.pop();
 
-            onStack[w - 1] = false;
+            on_stack[w - 1] = false;
             c.push_back(w);
 
         } while (w != v);
@@ -146,13 +146,10 @@ int Kruskal(vector<int> circuito)
 
     for (auto &aresta : arestas)
     {
-        if (matriz_adjacencia[aresta.origem - 1][aresta.destino - 1] != 0)
+        if (find(aresta.origem) != find(aresta.destino))
         {
-            if (find(aresta.origem) != find(aresta.destino))
-            {
-                total += aresta.tamanho;
-                createUnion(aresta.origem, aresta.destino);
-            }
+            total += aresta.tamanho;
+            createUnion(aresta.origem, aresta.destino);
         }
     }
 
@@ -217,15 +214,12 @@ int main()
         S = stack<int>();
         dfs = vector(n_vertices, -1);
         low = vector(n_vertices, -1);
-        onStack = vector(n_vertices, false);
+        on_stack = vector(n_vertices, false);
 
         for (int i = 1; i <= n_vertices; i++)
         {
             if (dfs[i - 1] == -1)
-            {
-                // Calcula um circuito
                 Tarjan(i);
-            }
         }
 
         if (n_questoes >= 1)
